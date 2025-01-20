@@ -1,0 +1,81 @@
+{
+  "flowName": "Inventory Transfer Processing",
+  "triggers": [
+    {
+      "type": "formSubmission",
+      "formId": "{{formId}}"
+    }
+  ],
+  "actions": [
+    {
+      "type": "getFormResponse",
+      "formId": "{{formId}}",
+      "responseId": "@triggerBody()?['responseId']"
+    },
+    {
+      "type": "addRowToExcel",
+      "file": "/InventoryManagement/Transactions.xlsx",
+      "table": "TransactionsTable",
+      "values": {
+        "Timestamp": "@utcNow()",
+        "JobNumber": "@body('getFormResponse')?['jobNumber']",
+        "Technician": "@body('getFormResponse')?['techName']",
+        "TransferDate": "@body('getFormResponse')?['transferDate']",
+        "TransferType": "@body('getFormResponse')?['transferType']",
+        "Material": "@body('getFormResponse')?['materialDescription']",
+        "Quantity": "@body('getFormResponse')?['quantity']",
+        "Unit": "@body('getFormResponse')?['unit']",
+        "Notes": "@body('getFormResponse')?['notes']"
+      }
+    },
+    {
+      "type": "updateInventoryTotals",
+      "file": "/InventoryManagement/Inventory.xlsx",
+      "table": "CurrentInventory",
+      "actions": {
+        "condition": "@equals(body('getFormResponse')?['transferType'], 'Take from Inventory')",
+        "true": {
+          "operation": "subtract",
+          "amount": "@body('getFormResponse')?['quantity']"
+        },
+        "false": {
+          "operation": "add",
+          "amount": "@body('getFormResponse')?['quantity']"
+        }
+      }
+    },
+    {
+      "type": "condition",
+      "expression": "@less(variables('currentStock'), variables('minimumStock'))",
+      "actions": {
+        "type": "sendEmail",
+        "to": "supervisor@company.com",
+        "subject": "Low Inventory Alert",
+        "body": "Material @{variables('material')} is below minimum stock level"
+      }
+    },
+    {
+      "type": "createFile",
+      "folder": "/InventoryManagement/Photos",
+      "name": "@concat(variables('jobNumber'), '_', utcNow(), '.jpg')",
+      "content": "@body('getFormResponse')?['photo']"
+    },
+    {
+      "type": "updateJobMaterials",
+      "file": "/InventoryManagement/JobSummary.xlsx",
+      "table": "MaterialsByJob",
+      "values": {
+        "JobNumber": "@body('getFormResponse')?['jobNumber']",
+        "Material": "@body('getFormResponse')?['materialDescription']",
+        "Quantity": "@body('getFormResponse')?['quantity']",
+        "TransferDate": "@body('getFormResponse')?['transferDate']"
+      }
+    }
+  ],
+  "errorHandling": {
+    "type": "sendEmail",
+    "to": "admin@company.com",
+    "subject": "Inventory Flow Error",
+    "body": "Error processing inventory transfer: @{body('Failed_Action')}"
+  }
+}
