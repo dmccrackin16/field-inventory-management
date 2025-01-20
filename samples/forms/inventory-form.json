@@ -1,0 +1,102 @@
+{
+  "formTitle": "Field Inventory Transfer Form",
+  "questions": [
+    {
+      "id": "jobNumber",
+      "type": "text",
+      "title": "Job Number",
+      "required": true,
+      "validation": {
+        "pattern": "^[A-Z0-9]{6}$",
+        "errorMessage": "Please enter a valid 6-character job number"
+      }
+    },
+    {
+      "id": "techName",
+      "type": "choice",
+      "title": "Technician Name",
+      "required": true,
+      "choices": [
+        "John Smith",
+        "Jane Doe",
+        "Mike Johnson"
+      ],
+      "allowOther": true
+    },
+    {
+      "id": "transferDate",
+      "type": "date",
+      "title": "Transfer Date",
+      "required": true,
+      "defaultToToday": true
+    },
+    {
+      "id": "transferType",
+      "type": "choice",
+      "title": "Transfer Type",
+      "required": true,
+      "choices": [
+        "Take from Inventory",
+        "Return to Inventory",
+        "Transfer Between Jobs"
+      ]
+    },
+    {
+      "id": "materials",
+      "type": "repeating",
+      "title": "Materials",
+      "required": true,
+      "fields": [
+        {
+          "id": "materialDescription",
+          "type": "text",
+          "title": "Material Description",
+          "required": true
+        },
+        {
+          "id": "quantity",
+          "type": "number",
+          "title": "Quantity",
+          "required": true,
+          "min": 0
+        },
+        {
+          "id": "unit",
+          "type": "choice",
+          "title": "Unit",
+          "required": true,
+          "choices": [
+            "Each",
+            "Feet",
+            "Meters",
+            "Pounds",
+            "Kilos"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "photo",
+      "type": "file",
+      "title": "Photo Documentation",
+      "required": false,
+      "allowMultiple": true,
+      "maxFiles": 3,
+      "acceptedTypes": [".jpg", ".jpeg", ".png"]
+    },
+    {
+      "id": "notes",
+      "type": "text",
+      "title": "Additional Notes",
+      "required": false,
+      "multiline": true
+    }
+  ],
+  "settings": {
+    "responseReceipt": true,
+    "submitMessage": "Thank you! Your inventory transfer has been recorded.",
+    "theme": {
+      "primaryColor": "#0078D4"
+    }
+  }
+}
